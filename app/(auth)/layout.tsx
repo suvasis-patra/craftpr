@@ -1,13 +1,14 @@
+import { notRequiredAuth } from "@/features/auth/actions";
 import React from "react";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await notRequiredAuth();
   return (
     <div>
-      <div></div>
       <div>{children}</div>
     </div>
   );

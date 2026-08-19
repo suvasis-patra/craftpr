@@ -4,6 +4,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSafeCallbackPath } from "@/features/auth/utils";
+import {
+  AUTH_PATHS,
+  DEFAULT_CALLBACK_URL,
+} from "@/features/auth/utils/constant";
 
 export const handleGithubAuth = async (formData: FormData) => {
   try {
@@ -33,4 +37,19 @@ export async function getServerSession(reqHeaders?: Headers) {
   return auth.api.getSession({
     headers: reqHeaders || (await headers()),
   });
+}
+
+export async function requiredAuth() {
+  const session = await getServerSession();
+  if (!session) {
+    redirect(AUTH_PATHS.signIn);
+  }
+  return session;
+}
+
+export async function notRequiredAuth(redirectTo = DEFAULT_CALLBACK_URL) {
+  const session = await getServerSession();
+  if (session) {
+    redirect(redirectTo);
+  }
 }

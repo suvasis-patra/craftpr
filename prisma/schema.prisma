@@ -27,6 +27,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  installation GithubAppInstallation?
 
   @@unique([email])
   @@map("user")
@@ -68,6 +69,20 @@ model Account {
   @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
   @@index([userId])
   @@map("account")
+}
+
+model GithubAppInstallation{
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  installationId Int
+  accountLogin String?
+  accountType String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("github_app_installation")
 }
 
 model Verification {

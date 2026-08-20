@@ -1,20 +1,16 @@
-import { App } from "octokit";
+import { GITHUB_APP_URL } from "./constants";
 
-let githubApp: App | null = null;
-
-export async function getGithubAppInstallationUrl(userId: string) {
-  const url = new URL(`${process.env.GITHUB_APP_PUBLIC_URL}/installations/new`);
+export function getGithubAppInstallationUrl(userId: string) {
+  const url = new URL(`${GITHUB_APP_URL}/installations/new`);
   url.searchParams.set("state", userId);
   return url.toString();
 }
 
-export async function getGithubApp() {
-  if (!githubApp) {
-    githubApp = new App({
-      appId: process.env.GITHUB_APP_ID!,
-      privateKey: process.env.GITHUB_SECRET_KEY!,
-      webhooks: { secret: process.env.GITHUB_WEBHOOK_SECRET! },
-    });
-  }
-  return githubApp;
+export function getAccountLogin(
+  account: { login?: string; slug?: string } | null | undefined,
+): string | null {
+  if (!account) return null;
+  if ("login" in account && account.login) return account.login;
+  if ("slug" in account && account.slug) return account.slug;
+  return null;
 }

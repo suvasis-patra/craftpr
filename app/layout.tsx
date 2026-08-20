@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 const merriweatherHeading = Merriweather({
   subsets: ["latin"],
@@ -52,15 +53,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>{children}</TooltipProvider>
-        </ThemeProvider>
-        <Toaster />
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>{children}</TooltipProvider>
+          </ThemeProvider>
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );

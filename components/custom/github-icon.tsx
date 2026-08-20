@@ -4,7 +4,7 @@ const GithubIcon = ({ height = 30, width = 30 }) => {
   return (
     <div>
       <Image
-        src={"github-brands-solid.svg"}
+        src={"/github-brands-solid.svg"}
         alt="github-icon"
         height={height}
         width={width}

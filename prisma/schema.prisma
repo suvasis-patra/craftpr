@@ -12,6 +12,13 @@ datasource db {
   provider = "postgresql"
 }
 
+enum RepoSyncStatus{
+  PENDING
+  SYNCING
+  SYNCED
+  FAILED
+}
+
 model Test {
   id   String @id @default(cuid())
   name String
@@ -95,4 +102,16 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+
+model RepoSync{
+  id String @id @default(cuid())
+  installationId String
+  status RepoSyncStatus @default(PENDING)
+  branch String
+  repoFullName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

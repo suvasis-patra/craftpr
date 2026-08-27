@@ -13,13 +13,14 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { githubReposInfiniteQuery } from "../utils/react-query";
-import { TDashboardRepo } from "../utils/types";
+import { TDashboardRepo, TRepoSyncStatus } from "../utils/types";
 import { LockIcon, LockKeyholeOpenIcon, StarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
+import RepoSyncingButton from "@/features/repo-sync/components/repo-sync-button";
+import { useRepoSyncStatus } from "@/hooks/use-repo-sync-status";
 export type TFilter = "all" | "public" | "private";
 
 const RepoList = () => {
+  const { getSyncStatus } = useRepoSyncStatus();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<TFilter>("all");
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -40,8 +41,8 @@ const RepoList = () => {
 
     const loaded = data.pages.flatMap((page) => page.repos);
     // Remove duplicates based on id
-    const uniqueRepos = loaded.filter((repo, index, self) =>
-      index === self.findIndex((r) => r.id === repo.id)
+    const uniqueRepos = loaded.filter(
+      (repo, index, self) => index === self.findIndex((r) => r.id === repo.id),
     );
     return [...uniqueRepos].sort(
       (a, b) =>
@@ -70,12 +71,14 @@ const RepoList = () => {
     });
   }, [repos, filter, search]);
   const handleLoadMore = useCallback(() => {
-    console.log('handleLoadMore called:', { hasNextPage, isFetchingNextPage });
     if (hasNextPage && !isFetchingNextPage) {
-      console.log('Fetching next page...');
+      console.log("Fetching next page...");
       fetchNextPage();
     } else {
-      console.log('Not fetching - conditions not met:', { hasNextPage, isFetchingNextPage });
+      console.log("Not fetching - conditions not met:", {
+        hasNextPage,
+        isFetchingNextPage,
+      });
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
@@ -148,9 +151,14 @@ const RepoList = () => {
     );
   } else {
     rows = visibleRepos.map((repo, index) => (
-      <RepoRow key={`${repo.id}-${index}`} repo={repo} />
+      <RepoRow 
+        key={`${repo.id}-${index}`} 
+        repo={repo} 
+        sseSyncStatus={getSyncStatus(repo.fullName)}
+      />
     ));
   }
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -192,7 +200,7 @@ const RepoList = () => {
       <div
         ref={loadMoreRef}
         className="py-2 text-center text-sm text-muted-foreground"
-        style={{ minHeight: '50px' }}
+        style={{ minHeight: "50px" }}
       >
         {footer}
       </div>
@@ -200,7 +208,7 @@ const RepoList = () => {
   );
 };
 
-function RepoRow({ repo }: { repo: TDashboardRepo }) {
+function RepoRow({ repo, sseSyncStatus }: { repo: TDashboardRepo; sseSyncStatus: TRepoSyncStatus | null }) {
   const tone = repo.visibility === "public" ? "info" : "warning";
 
   return (
@@ -235,7 +243,11 @@ function RepoRow({ repo }: { repo: TDashboardRepo }) {
         {formatDistanceToNow(new Date(repo.updatedAt), { addSuffix: true })}
       </TableCell>
       <TableCell className="text-right">
-        <Button>sync</Button>
+        <RepoSyncingButton
+          branch={repo.defaultBranch}
+          repoFullName={repo.fullName}
+          syncStatus={sseSyncStatus ?? repo.syncStatus ?? null}
+        />
       </TableCell>
     </TableRow>
   );

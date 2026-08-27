@@ -1,6 +1,7 @@
 import {
   AppWindowIcon,
   Archive,
+  Bell,
   GitPullRequest,
   GitPullRequestCreateIcon,
   LayoutDashboard,
@@ -12,6 +13,7 @@ export const DASHBOARD_ROUTES = {
   repos: "/dashboard/repos",
   pullRequest: "/dashboard/pull-request",
   github: "/dashboard/github",
+  notification: "/dashboard/notification",
   settings: "/dashboard/settings",
 } as const;
 
@@ -31,6 +33,7 @@ export const NAV_ITEMS = [
     href: DASHBOARD_ROUTES.pullRequest,
   },
   { label: "Github App", icon: AppWindowIcon, href: DASHBOARD_ROUTES.github },
+  { label: "Notifications", icon: Bell, href: DASHBOARD_ROUTES.notification },
   { label: "Settings", icon: Settings, href: DASHBOARD_ROUTES.settings },
 ] as const;
 

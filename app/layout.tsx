@@ -61,8 +61,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             disableTransitionOnChange
           >
             <TooltipProvider>{children}</TooltipProvider>
+            <Toaster richColors />
           </ThemeProvider>
-          <Toaster />
         </QueryProvider>
       </body>
     </html>

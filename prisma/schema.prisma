@@ -107,10 +107,12 @@ model Verification {
 
 model RepoSync{
   id String @id @default(cuid())
-  installationId String
+  installationId Int
+  chunkCount Int @default(0)
+  syncedAt DateTime?
   status RepoSyncStatus @default(PENDING)
   branch String
-  repoFullName String
+  repoFullName String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

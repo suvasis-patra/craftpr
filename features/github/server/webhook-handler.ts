@@ -4,7 +4,7 @@ import { TPullRequestWebhookPayload } from "../utils/types";
 import { markRepoSyncAsPending } from "@/features/repo-sync/actions/sync";
 import { handlePrReview } from "@/features/review/server/pr-review";
 
-export async function handleWebhookEvents(request: NextRequest) {
+export async function handleWebhookEvents(request: NextRequest): Promise<NextResponse> {
   const payload = await request.text();
   const webhookSignature = request.headers.get("x-hub-signature-256");
   const eventName = request.headers.get("x-github-event");
@@ -18,11 +18,11 @@ export async function handleWebhookEvents(request: NextRequest) {
   const jsonPayload = JSON.parse(payload) as TPullRequestWebhookPayload;
   switch (eventName) {
     case "push":
-      handlePushEvent(jsonPayload);
+      await handlePushEvent(jsonPayload);
       return NextResponse.json({ received: true });
 
     case "pull_request":
-      handlePullRequestEvent(jsonPayload);
+      await handlePullRequestEvent(jsonPayload);
       return NextResponse.json({ received: true });
 
     default:
@@ -35,27 +35,28 @@ export async function handlePushEvent(payload: TPullRequestWebhookPayload) {
     payload.ref !== "refs/heads/master" &&
     payload.ref !== "refs/heads/main"
   ) {
-    return NextResponse.json({ message: `ignored non main branch push` });
+    // Don't process non-main branch pushes
+    return;
   }
   await markRepoSyncAsPending(payload.repository.full_name);
 }
 
 export async function handlePullRequestEvent(
   payload: TPullRequestWebhookPayload,
-) {
+): Promise<NextResponse> {
   const action = payload.action;
   switch (action) {
     case "closed":
       await markRepoSyncAsPending(payload.repository.full_name);
-      break;
+      return NextResponse.json({ received: true });
 
     case "opened":
-    case "syncronize":
+    case "synchronize":
     case "reopened":
       await handlePrReview(payload);
-      break;
+      return NextResponse.json({ received: true });
 
     default:
-      return null;
+      return NextResponse.json({ message: `Ignored action: ${action}` });
   }
 }

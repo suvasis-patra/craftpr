@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isGithubWebhookSignatureValid } from "../utils";
 import { TPullRequestWebhookPayload } from "../utils/types";
-import {
-  getRepoSyncByRepoFullName,
-  markRepoSyncAsPending,
-} from "@/features/repo-sync/actions/sync";
+import { markRepoSyncAsPending } from "@/features/repo-sync/actions/sync";
+import { handlePrReview } from "@/features/review/server/pr-review";
 
 export async function handleWebhookEvents(request: NextRequest) {
   const payload = await request.text();
@@ -20,10 +18,12 @@ export async function handleWebhookEvents(request: NextRequest) {
   const jsonPayload = JSON.parse(payload) as TPullRequestWebhookPayload;
   switch (eventName) {
     case "push":
-      return handlePushEvent(jsonPayload);
+      handlePushEvent(jsonPayload);
+      return NextResponse.json({ received: true });
 
     case "pull_request":
-      return handlePullRequestEvent(jsonPayload);
+      handlePullRequestEvent(jsonPayload);
+      return NextResponse.json({ received: true });
 
     default:
       return NextResponse.json({ message: `Ignored event: ${eventName}` });
@@ -45,7 +45,17 @@ export async function handlePullRequestEvent(
 ) {
   const action = payload.action;
   switch (action) {
-    case "merge":
+    case "closed":
       await markRepoSyncAsPending(payload.repository.full_name);
+      break;
+
+    case "opened":
+    case "syncronize":
+    case "reopened":
+      await handlePrReview(payload);
+      break;
+
+    default:
+      return null;
   }
 }

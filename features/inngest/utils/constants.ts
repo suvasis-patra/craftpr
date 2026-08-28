@@ -1,1 +1,4 @@
-export const INNGEST_FUNCTION_IDS = ["sync-repo-codebase"] as const;
+export const INNGEST_FUNCTION_IDS = [
+  "sync-repo-codebase",
+  "review-pull-request",
+] as const;

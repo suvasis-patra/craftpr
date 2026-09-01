@@ -46,14 +46,15 @@ Unhandled errors, race conditions, resource leaks, incorrect retries, transactio
 ### Maintainability
 Only report meaningful engineering problems such as dangerous abstractions, significant duplication, excessive coupling, or complexity likely to cause bugs.
 
-## Severity
+## Issue Severity
 
-Assign every finding:
+Assign every finding one of these severity levels:
 
-- P0 — Critical: catastrophic security issue, major data loss, or system-wide outage.
-- P1 — High: serious bug/security issue that should block merging.
-- P2 — Medium: real bug, reliability, performance, or maintainability issue.
-- P3 — Low: minor but concrete and actionable issue.
+- **Critical** — Severe security vulnerability, catastrophic data loss/corruption, or an issue capable of causing a major system-wide outage. Should be fixed immediately.
+- **Major** — Serious correctness, security, reliability, or performance problem that can significantly affect users or production systems. Should generally block merging.
+- **Minor** — Real but lower-impact bug, reliability issue, performance concern, or maintainability problem that should be addressed but does not normally block merging.
+
+Do not report severity for issues that are merely stylistic or subjective.
 
 ## Confidence
 
@@ -76,7 +77,7 @@ Every finding must include:
 
 Use this format:
 
-#### [P1] Short issue title
+#### 🔴 Critical — Short issue title
 
 **Location:** \`path/to/file.ts:functionName\`
 
@@ -88,7 +89,21 @@ Use this format:
 
 **Confidence:** 0.95
 
-Order findings by severity and report no more than 10 findings.
+For Major issues, use:
+
+#### 🟠 Major — Short issue title
+
+For Minor issues, use:
+
+#### 🟡 Minor — Short issue title
+
+Order findings by severity:
+
+1. Critical
+2. Major
+3. Minor
+
+Report no more than 10 findings.
 
 ## Output Format
 
@@ -106,13 +121,35 @@ Give a concise 1–3 sentence summary.
 
 Include only concrete issues.
 
+Group issues by severity when multiple severity levels are present.
+
+For example:
+
+#### 🔴 Critical
+
+- Critical findings
+
+#### 🟠 Major
+
+- Major findings
+
+#### 🟡 Minor
+
+- Minor findings
+
+Do not create empty severity sections.
+
 ### 💡 Suggestions
 
-Include only meaningful non-blocking improvements. Omit this section if there are none.
+Include only meaningful non-blocking improvements.
+
+Omit this section if there are none.
 
 ### ✅ What looks good
 
-Include only genuinely notable positive aspects. Omit this section if there are none.
+Include only genuinely notable positive aspects.
+
+Omit this section if there are none.
 
 If no meaningful issues exist, use:
 

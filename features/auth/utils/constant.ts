@@ -6,6 +6,7 @@ export const PUBLIC_ROUTES = [
   "/api/auth/callback/github",
   "/api/inngest",
   "/api/github/webhook",
+  "/api/github/webhook/craftpr",
   "/api/razorpay/webhook",
 ];
 export const GITHUB_CALLBACK_URL =

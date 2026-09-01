@@ -3,7 +3,6 @@ import {
   Archive,
   Bell,
   GitPullRequest,
-  GitPullRequestCreateIcon,
   LayoutDashboard,
   Settings,
 } from "lucide-react";
@@ -11,7 +10,7 @@ import {
 export const DASHBOARD_ROUTES = {
   overview: "/dashboard",
   repos: "/dashboard/repos",
-  pullRequest: "/dashboard/pull-request",
+  pullRequests: "/dashboard/pull-requests",
   github: "/dashboard/github",
   notification: "/dashboard/notification",
   settings: "/dashboard/settings",
@@ -30,7 +29,7 @@ export const NAV_ITEMS = [
   {
     label: "Pull Requests",
     icon: GitPullRequest,
-    href: DASHBOARD_ROUTES.pullRequest,
+    href: DASHBOARD_ROUTES.pullRequests,
   },
   { label: "Github App", icon: AppWindowIcon, href: DASHBOARD_ROUTES.github },
   { label: "Notifications", icon: Bell, href: DASHBOARD_ROUTES.notification },

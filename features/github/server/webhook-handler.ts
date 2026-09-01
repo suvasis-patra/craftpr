@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isGithubWebhookSignatureValid } from "../utils";
 import { TPullRequestWebhookPayload } from "../utils/types";
-import {
-  getRepoSyncByRepoFullName,
-  markRepoSyncAsPending,
-} from "@/features/repo-sync/actions/sync";
+import { markRepoSyncAsPending } from "@/features/repo-sync/actions/sync";
+import { handlePrReview } from "@/features/review/server/pr-review";
 
-export async function handleWebhookEvents(request: NextRequest) {
+export async function handleWebhookEvents(
+  request: NextRequest,
+): Promise<NextResponse> {
+  console.log("hi there, from webhook");
   const payload = await request.text();
   const webhookSignature = request.headers.get("x-hub-signature-256");
   const eventName = request.headers.get("x-github-event");
@@ -20,10 +21,12 @@ export async function handleWebhookEvents(request: NextRequest) {
   const jsonPayload = JSON.parse(payload) as TPullRequestWebhookPayload;
   switch (eventName) {
     case "push":
-      return handlePushEvent(jsonPayload);
+      await handlePushEvent(jsonPayload);
+      return NextResponse.json({ received: true });
 
     case "pull_request":
-      return handlePullRequestEvent(jsonPayload);
+      await handlePullRequestEvent(jsonPayload);
+      return NextResponse.json({ received: true });
 
     default:
       return NextResponse.json({ message: `Ignored event: ${eventName}` });
@@ -35,17 +38,28 @@ export async function handlePushEvent(payload: TPullRequestWebhookPayload) {
     payload.ref !== "refs/heads/master" &&
     payload.ref !== "refs/heads/main"
   ) {
-    return NextResponse.json({ message: `ignored non main branch push` });
+    // Don't process non-main branch pushes
+    return;
   }
   await markRepoSyncAsPending(payload.repository.full_name);
 }
 
 export async function handlePullRequestEvent(
   payload: TPullRequestWebhookPayload,
-) {
+): Promise<NextResponse> {
   const action = payload.action;
   switch (action) {
-    case "merge":
+    case "closed":
       await markRepoSyncAsPending(payload.repository.full_name);
+      return NextResponse.json({ received: true });
+
+    case "opened":
+    case "synchronize":
+    case "reopened":
+      await handlePrReview(payload);
+      return NextResponse.json({ received: true });
+
+    default:
+      return NextResponse.json({ message: `Ignored action: ${action}` });
   }
 }

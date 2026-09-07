@@ -19,10 +19,23 @@ enum RepoSyncStatus{
   FAILED
 }
 
-enum ReviewStatus{
+enum PRStatus{
+  OPEN
+  CLOSED
+}
+
+enum AIReviewStatus{
   PENDING
   COMPLETE
   PROCESSING
+  FAILED
+}
+
+enum PRFileStatus {
+  ADDED
+  MODIFIED
+  DELETED
+  RENAMED
 }
 
 model Test {
@@ -110,24 +123,62 @@ model Verification {
   @@map("verification")
 }
 
-model PullRequest{
-  id String @id @default(cuid())
-  installationId Int
-  repoFullName String
-  prNumber Int
-  title String
-  authorLogin String?
-  baseBranch String
-  headSha String
-  status ReviewStatus @default(PENDING)
-  reviewComment String?
-  reviewedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model PullRequest {
+  id              String   @id @default(cuid())
 
-  @@unique([repoFullName,prNumber])
+  installationId  Int
+  repoFullName    String
+  prNumber        Int
+
+  title           String
+  authorLogin     String?
+  authorAvatarUrl String?
+
+  sourceBranch    String
+  targetBranch    String
+  headSha         String
+  filesChanged    Int @default(0)
+
+  prCreatedAt     DateTime
+
+  prStatus        PRStatus @default(OPEN)
+  isDraft         Boolean  @default(false)
+
+  aiReviewStatus  AIReviewStatus @default(PENDING)
+  reviewComment   String?
+  reviewedAt      DateTime?
+
+  files PRFile[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([repoFullName, prNumber])
+  @@index([installationId])
+  @@index([repoFullName])
   @@map("pull_request")
 }
+
+model PRFile {
+  id          String   @id @default(cuid())
+  pullRequestId String
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  
+  filePath    String
+  patch       String   // The full diff/patch
+  status      PRFileStatus   // "added", "modified", "deleted", "renamed"
+  additions   Int      @default(0)
+  deletions   Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([pullRequestId, filePath])
+  @@index([pullRequestId])
+  @@map("pr_file")
+}
+
+
 
 
 model RepoSync{

@@ -1,15 +1,29 @@
 import { TPullRequestWebhookPayload } from "@/features/github/utils/types";
-import { savePullRequest } from "../actions/pull-request";
+import { savePrPatches, savePullRequest } from "../actions/pull-request";
 import { inngest } from "@/features/inngest/utils/client";
 import { INNGEST_EVENTS } from "@/features/inngest/utils/events";
 import { getGithubApp } from "@/features/github/server/github-app";
 import { TPRFile } from "../utils/types";
 import { TCodeChunk } from "@/features/repo-sync/utils/type";
+import { PRFileStatus } from "@/lib/generated/prisma/enums";
 
 const MAX_CHUNK_LINES = 80;
 
 function buildChunkId(prNumber: number, filePath: string, part: number) {
   return `pr-${prNumber}--${filePath}--part-${part}`;
+}
+
+function mapGitHubStatusToEnum(status: string): PRFileStatus {
+  const statusMap: Record<string, PRFileStatus> = {
+    added: PRFileStatus.ADDED,
+    modified: PRFileStatus.MODIFIED,
+    removed: PRFileStatus.DELETED, // GitHub uses "removed" not "deleted"
+    renamed: PRFileStatus.RENAMED,
+    changed: PRFileStatus.MODIFIED, // Similar to modified
+    copied: PRFileStatus.ADDED, // Similar to added
+    unchanged: PRFileStatus.MODIFIED, // No change but part of PR
+  };
+  return statusMap[status] || PRFileStatus.MODIFIED; // Default to MODIFIED if unknown
 }
 
 export async function handlePrReview(payload: TPullRequestWebhookPayload) {
@@ -24,10 +38,12 @@ export async function getPullRequestFiles({
   repoFullName,
   prNumber,
   installationId,
+  prId,
 }: {
   prNumber: number;
   installationId: number;
   repoFullName: string;
+  prId: string;
 }) {
   const app = getGithubApp();
   const [owner, repo] = repoFullName.split("/");
@@ -41,6 +57,14 @@ export async function getPullRequestFiles({
     if (!file.patch) {
       continue;
     }
+    await savePrPatches({
+      pullRequestId: prId,
+      patch: file.patch,
+      deletions: file.deletions,
+      additions: file.additions,
+      status: mapGitHubStatusToEnum(file.status),
+      filePath: file.filename,
+    });
     files.push({ patch: file.patch, path: file.filename });
   }
   return files;

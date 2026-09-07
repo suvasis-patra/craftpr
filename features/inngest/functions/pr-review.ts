@@ -15,7 +15,7 @@ import {
   storeChunksToVectorStore,
 } from "@/features/vectordb/server/store";
 import { getRepoSyncStatusByRepoFullName } from "@/features/repo-sync/actions/sync";
-import { RepoSyncStatus, ReviewStatus } from "@/lib/generated/prisma/enums";
+import { RepoSyncStatus, AIReviewStatus } from "@/lib/generated/prisma/enums";
 import { buildRepoNamespace } from "@/features/vectordb/utils";
 import {
   generateAIReview,
@@ -26,17 +26,16 @@ export const reviewPullRequestFunction = inngest.createFunction(
   { id: INNGEST_FUNCTION_IDS[1], triggers: { event: INNGEST_EVENTS[1] } },
   async ({ step, event }) => {
     const prId = event.data.pullRequestId;
-    const { repoFullName, installationId, prNumber, title } = await step.run(
-      "mark-review-processing",
-      async () => {
-        return await markReviewProcessing(prId);
-      },
-    );
+    const prData = await step.run("mark-review-processing", async () => {
+      return await markReviewProcessing(prId);
+    });
+    const { repoFullName, installationId, prNumber, title } = prData;
     const chunks = await step.run("chunk-pr-related-files", async () => {
       const files = await getPullRequestFiles({
         repoFullName,
         installationId,
         prNumber,
+        prId,
       });
       return chunkPrFiles(prNumber, files);
     });
@@ -83,8 +82,8 @@ export const reviewPullRequestFunction = inngest.createFunction(
       });
     });
     await step.run("mark-ai-review-complete", async () => {
-      await markReviewComplted(prId);
+      await markReviewComplted(prId, review);
     });
-    return { prId, status: ReviewStatus.COMPLETE };
+    return { prId, status: AIReviewStatus.COMPLETE };
   },
 );

@@ -23,7 +23,10 @@ export type TPullRequestWebhookPayload = {
     number: number;
     title: string;
     user: { login: string } | null;
-    head: { sha: string };
+    head: { sha: string; ref: string };
     base: { ref: string };
+    created_at: string;
+    changed_files: number;
   };
+  sender: { login: string; avatra_url: string };
 };

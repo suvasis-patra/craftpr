@@ -16,23 +16,17 @@ export const githubReposInfiniteQuery = infiniteQueryOptions({
     }
 
     const data = await response.json();
-    console.log('React Query received data:', {
-      page: data.page,
-      hasMore: data.hasMore,
-      reposCount: data.repos?.length,
-      totalCount: data.totalCount
-    });
     return data;
   },
   initialPageParam: 1,
   getNextPageParam: (lastPage) => {
-    console.log('getNextPageParam called with:', lastPage);
+    console.log("getNextPageParam called with:", lastPage);
     if (lastPage.hasMore) {
       const nextPage = (lastPage.page || 0) + 1;
-      console.log('Next page calculated:', nextPage);
+      console.log("Next page calculated:", nextPage);
       return nextPage;
     }
-    console.log('No more pages');
+    console.log("No more pages");
     return undefined;
   },
   staleTime: REPOS_STALE_TIME,

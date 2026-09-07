@@ -7,7 +7,6 @@ import { handlePrReview } from "@/features/review/server/pr-review";
 export async function handleWebhookEvents(
   request: NextRequest,
 ): Promise<NextResponse> {
-  console.log("hi there, from webhook");
   const payload = await request.text();
   const webhookSignature = request.headers.get("x-hub-signature-256");
   const eventName = request.headers.get("x-github-event");

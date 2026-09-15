@@ -189,7 +189,7 @@ const user = await getUser(userId);
 - Combine duplicate findings.
 - Prefer high-confidence findings.
 - If the evidence is insufficient, do not report the issue.
-- NEVER output tool calls, function calls, or any syntax that resembles `[tool_call_start]`, `[tool_call_end]`, or similar patterns.
+- NEVER output tool calls, function calls, or any syntax that resembles ${`[tool_call_start]`}, ${`[tool_call_end]`}, or similar patterns.
 - NEVER output JSON, XML, or any structured data format that is not valid GitHub Markdown.
 - Your response must be plain, readable GitHub Markdown text only - no special formatting, no code wrappers, no tool invocations.
 `;

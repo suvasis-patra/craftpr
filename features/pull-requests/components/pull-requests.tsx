@@ -19,7 +19,6 @@ import {
   PullRequestEmptyState,
   PullRequestErrorState,
   PullRequestLoadingState,
-  PullRequestNoResultsState,
 } from "./pull-request-states";
 import { TPrFilter } from "../utils/types";
 import { Separator } from "@/components/ui/separator";

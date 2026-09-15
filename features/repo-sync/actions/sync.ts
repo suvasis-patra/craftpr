@@ -67,7 +67,7 @@ export async function getRepoSyncByRepoFullName(repoFullName: string) {
 }
 
 export async function markRepoSyncAsPending(repoFullName: string) {
-  return await prisma.repoSync.update({
+  return await prisma.repoSync.updateMany({
     where: { repoFullName },
     data: { status: "PENDING" },
   });

@@ -3,18 +3,15 @@
 import { useState } from "react";
 import { PRFileStatus } from "@/lib/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  FilePlus, 
-  FileEdit, 
-  FileMinus, 
+import {
+  FilePlus,
+  FileEdit,
+  FileMinus,
   FileOutput,
   Filter,
   ChevronUp,
   ChevronDown as ExpandAllIcon,
-  FileCode
+  FileCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FileDiffItem from "./file-diff-item";
@@ -37,14 +34,14 @@ const filterConfig = {
   added: { label: "Added", icon: FilePlus },
   modified: { label: "Modified", icon: FileEdit },
   deleted: { label: "Deleted", icon: FileMinus },
-  renamed: { label: "Renamed", icon: FileOutput }
+  renamed: { label: "Renamed", icon: FileOutput },
 };
 
 export default function FileChangesList({ files }: FileChangesListProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
 
-  const filteredFiles = files.filter(file => {
+  const filteredFiles = files.filter((file) => {
     if (filter === "all") return true;
     return file.status.toLowerCase() === filter;
   });
@@ -53,12 +50,12 @@ export default function FileChangesList({ files }: FileChangesListProps) {
     if (expandedFiles.size === filteredFiles.length) {
       setExpandedFiles(new Set());
     } else {
-      setExpandedFiles(new Set(filteredFiles.map(f => f.id)));
+      setExpandedFiles(new Set(filteredFiles.map((f) => f.id)));
     }
   };
 
   const toggleFileExpand = (fileId: string) => {
-    setExpandedFiles(prev => {
+    setExpandedFiles((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(fileId)) {
         newSet.delete(fileId);
@@ -79,7 +76,7 @@ export default function FileChangesList({ files }: FileChangesListProps) {
         <div className="flex items-center gap-3">
           <FileCode className="size-4 text-[#858585]" />
           <span className="text-sm font-medium text-[#d4d4d4]">
-            {files.length} {files.length === 1 ? 'file' : 'files'} changed
+            {files.length} {files.length === 1 ? "file" : "files"} changed
           </span>
           <span className="text-sm text-[#2ea043] font-medium">
             +{totalAdditions}
@@ -129,7 +126,7 @@ export default function FileChangesList({ files }: FileChangesListProps) {
           const config = filterConfig[filterType];
           const Icon = config.icon;
           const isActive = filter === filterType;
-          
+
           return (
             <Button
               key={filterType}
@@ -138,9 +135,9 @@ export default function FileChangesList({ files }: FileChangesListProps) {
               onClick={() => setFilter(filterType)}
               className={cn(
                 "gap-2 h-8 text-xs rounded-md",
-                isActive 
-                  ? "bg-[#2d2d2d] text-[#d4d4d4] border border-[#3c3c3c]" 
-                  : "text-[#858585] hover:text-[#d4d4d4] hover:bg-[#2d2d2d]"
+                isActive
+                  ? "bg-[#2d2d2d] text-[#d4d4d4] border border-[#3c3c3c]"
+                  : "text-[#858585] hover:text-[#d4d4d4] hover:bg-[#2d2d2d]",
               )}
             >
               <Icon className="size-3" />

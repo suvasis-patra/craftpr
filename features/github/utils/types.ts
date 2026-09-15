@@ -27,6 +27,7 @@ export type TPullRequestWebhookPayload = {
     base: { ref: string };
     created_at: string;
     changed_files: number;
+    merged: boolean;
   };
   sender: { login: string; avatra_url: string };
 };

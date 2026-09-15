@@ -3,6 +3,7 @@ import { isGithubWebhookSignatureValid } from "../utils";
 import { TPullRequestWebhookPayload } from "../utils/types";
 import { markRepoSyncAsPending } from "@/features/repo-sync/actions/sync";
 import { handlePrReview } from "@/features/review/server/pr-review";
+import { markPrAsClosed } from "@/features/pull-requests/actions";
 
 export async function handleWebhookEvents(
   request: NextRequest,
@@ -49,7 +50,13 @@ export async function handlePullRequestEvent(
   const action = payload.action;
   switch (action) {
     case "closed":
-      await markRepoSyncAsPending(payload.repository.full_name);
+      if (payload.pull_request.merged) {
+        await markRepoSyncAsPending(payload.repository.full_name);
+      }
+      await markPrAsClosed({
+        repoFullName: payload.repository.full_name,
+        prNumber: payload.pull_request.number,
+      });
       return NextResponse.json({ received: true });
 
     case "opened":

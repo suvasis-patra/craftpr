@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { PRStatus } from "@/lib/generated/prisma/enums";
 
 export interface FetchPRsParams {
   cursor?: string;
@@ -39,6 +40,19 @@ export async function getPrDetailsById(id: string) {
 export async function getPrFiles(prId: string) {
   return await prisma.pRFile.findMany({
     where: { pullRequestId: prId },
-    orderBy: { filePath: 'asc' }
+    orderBy: { filePath: "asc" },
+  });
+}
+
+export async function markPrAsClosed({
+  repoFullName,
+  prNumber,
+}: {
+  repoFullName: string;
+  prNumber: number;
+}) {
+  return await prisma.pullRequest.update({
+    where: { repoFullName_prNumber: { repoFullName, prNumber } },
+    data: { prStatus: PRStatus.CLOSED },
   });
 }
